@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "72550092388",
+    "project_id": "goalrush-780b2",
+    "storage_bucket": "goalrush-780b2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:72550092388:android:cb03932d90ca8b682b9971",
+        "android_client_info": {
+          "package_name": "com.goalrush.goalrush"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7ccJWCNW7fTHNuIIw6MEjPchFLsJgCZM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

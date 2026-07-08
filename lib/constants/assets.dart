@@ -1,22 +1,36 @@
-/// Central place for every asset path used across the app so that a typo
-/// only ever has to be fixed in one spot.
+/// Central place for every asset path used across the app.
+///
+/// [FINGERPRINT] The folder segment names are project-unique on purpose.
+/// If you fork this project, rename `_backdrops` on disk AND update
+/// `pubspec.yaml` `flutter.assets`.
 class AppAssets {
   AppAssets._();
 
-  static const String _additional = 'assets/Goal_Rush_additional_assets';
+  static const String _backdrops = 'assets/gr_stadium_backdrops_v2';
   static const String _gameplay = 'assets/Goal_Rush_gameplay_assets';
 
-  static const String logo = '$_additional/Game_Name.webp';
-  static const String icon = '$_additional/Icon.png';
-  static const String verticalLoading = '$_additional/Vertical_Loading_Screen.webp';
-  static const String horizontalLoading = '$_additional/Horizontal_Loading_Screen.webp';
-  static const String verticalNoWifi = '$_additional/Vertical_Nowifi_Screen.webp';
-  static const String horizontalNoWifi = '$_additional/Horizontal_Nowifi_Screen.webp';
+  static const String logo = '$_backdrops/Game_Name.webp';
+  static const String iconLegacy = '$_backdrops/Icon.png';
+  static const String iconMain = '$_backdrops/icon2.png';
+  static const String verticalLoading =
+      '$_backdrops/Vertical_Loading_Screen.webp';
+  static const String horizontalLoading =
+      '$_backdrops/Horizontal_Loading_Screen.webp';
+  static const String verticalNoWifi =
+      '$_backdrops/Vertical_Nowifi_Screen.webp';
+  static const String horizontalNoWifi =
+      '$_backdrops/Horizontal_Nowifi_Screen.webp';
+  static const String verticalNotifications =
+      '$_backdrops/Vertical_Notifications_Screen.webp';
+  static const String horizontalNotifications =
+      '$_backdrops/Horizontal_Notifications_Screen.webp';
 
-  static const String goldenQuestionMark = '$_gameplay/golden_question_mark_asset.webp';
-  static const String goldenTrophy = '$_gameplay/golden_football_trophy_asset.webp';
+  static const String goldenQuestionMark =
+      '$_gameplay/golden_question_mark_asset.webp';
+  static const String goldenTrophy =
+      '$_gameplay/golden_football_trophy_asset.webp';
 
-  static const List<String> verticalFields = [
+  static const List<String> verticalFields = <String>[
     '$_gameplay/vertic_bg1_asset.webp',
     '$_gameplay/vertic_bg2_asset.webp',
     '$_gameplay/vertic_bg3_asset.webp',
@@ -24,7 +38,7 @@ class AppAssets {
     '$_gameplay/vertic_bg5_asset.webp',
   ];
 
-  static const List<String> fieldNames = [
+  static const List<String> fieldNames = <String>[
     'Sunset Stadium',
     'Tropical Beach',
     'Campus Park',
@@ -32,7 +46,7 @@ class AppAssets {
     'Night Arena',
   ];
 
-  static const List<String> goalkeepers = [
+  static const List<String> goalkeepers = <String>[
     '$_gameplay/base_goalkeeper_asset.webp',
     '$_gameplay/blue_goalkeeper_asset.webp',
     '$_gameplay/green_goalkeeper_asset.webp',
@@ -40,7 +54,7 @@ class AppAssets {
     '$_gameplay/white_goalkeeper_asset.webp',
   ];
 
-  static const List<String> goalkeeperNames = [
+  static const List<String> goalkeeperNames = <String>[
     'Classic Keeper',
     'Blue Keeper',
     'Green Keeper',
@@ -48,7 +62,7 @@ class AppAssets {
     'White Keeper',
   ];
 
-  static const List<String> goalposts = [
+  static const List<String> goalposts = <String>[
     '$_gameplay/white_football_goalposts_asset.webp',
     '$_gameplay/blue_football_goalposts_asset.webp',
     '$_gameplay/green_football_goalposts_asset.webp',
@@ -56,7 +70,7 @@ class AppAssets {
     '$_gameplay/yellow_football_goalposts_asset.webp',
   ];
 
-  static const List<String> goalpostNames = [
+  static const List<String> goalpostNames = <String>[
     'White Goal',
     'Blue Goal',
     'Green Goal',
@@ -64,7 +78,7 @@ class AppAssets {
     'Yellow Goal',
   ];
 
-  static const List<String> balls = [
+  static const List<String> balls = <String>[
     '$_gameplay/soccer_ball_asset.webp',
     '$_gameplay/golden_soccer_ball_asset.webp',
     '$_gameplay/futuristic_soccer_ball_asset.webp',
@@ -72,7 +86,7 @@ class AppAssets {
     '$_gameplay/training_soccer_ball_asset.webp',
   ];
 
-  static const List<String> ballNames = [
+  static const List<String> ballNames = <String>[
     'Classic Ball',
     'Golden Ball',
     'Futuristic Ball',
