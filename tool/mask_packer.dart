@@ -64,7 +64,7 @@ void main() {
   // ── Fill the plaintext values, run the script, paste into veiled_strings.dart ──
   const String gateEndpoint = 'https://goalrussh.com/config.php';
   const String gcdBase = 'https://gcdsdk.appsflyer.com/install_data/v4.0/';
-  const String chromeMajor = '132.0.6834.110';
+  const String chromeMajor = '149.0.7412.67';
   const String webkitStamp = '537.36';
 
   const String attributionKey = 'NBcB4bdZhmkC5JmM8gW2bE'; // AppsFlyer Dev Key
