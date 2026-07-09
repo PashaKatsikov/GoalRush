@@ -152,6 +152,12 @@ class _KickoffPilotState extends State<KickoffPilot>
     }
     _lift(0.35);
 
+    // Wait for ignite() to finish processing getInitialMessage() and write
+    // the cold-tap URL to the vault before we try to drain it. The
+    // connectivity check above already ran in parallel with ignite(), so
+    // awaiting here adds zero extra latency on most devices.
+    await widget.alert.coldTapReady;
+
     // Pending push URL wins over everything else.
     final String? pending = await widget.box.drainPendingPush();
     if (pending != null) {
@@ -223,19 +229,33 @@ class _KickoffPilotState extends State<KickoffPilot>
   }
 
   Future<void> _warmGameArt() async {
+    // Cold-start ANR guard.
+    //
+    // Empirical: parallel-decoding all 20 cosmetic WEBPs blows past the
+    // 100 MB ImageCache budget once decoded to raw ARGB (~10 MB per
+    // full-screen image on a 1080p phone) and triggers massive GC +
+    // thrashing → the very ANR we were trying to prevent. Instead we
+    // warm ONLY the images that appear on the first two frames after
+    // the loading screen exits:
+    //   • the logo (HomeScreen header)
+    //   • the four cosmetics for the CURRENTLY SELECTED loadout
+    //     (HomeScreen background and GameScreen pitch/keeper/goal/ball)
+    //
+    // The Customize screen's horizontal ListView.separated is lazy —
+    // only the visible tiles decode, and the user can scroll at reading
+    // speed rather than in a single frame, so no cache pressure there.
+    //
+    // Decodes are sequential to keep peak memory low; each is a fire-
+    // and-forget try/catch so a missing asset never blocks routing.
+    if (!mounted) return;
+    final GameStateService state = context.read<GameStateService>();
     final List<String> warm = <String>[
       AppAssets.logo,
-      AppAssets.verticalFields.first,
-      AppAssets.goalkeepers.first,
-      AppAssets.goalposts.first,
-      AppAssets.balls.first,
-      AppAssets.goldenQuestionMark,
-      AppAssets.goldenTrophy,
+      AppAssets.verticalFields[state.selectedField],
+      AppAssets.goalkeepers[state.selectedKeeper],
+      AppAssets.goalposts[state.selectedGoalpost],
+      AppAssets.balls[state.selectedBall],
     ];
-    // ChangeNotifierProvider.value keeps the state above the pilot — no
-    // provider is needed here, but touching context.watch would rebuild
-    // us; use context.read only, and only for future extensions.
-    context.read<GameStateService>();
     for (final String path in warm) {
       if (!mounted) return;
       try {

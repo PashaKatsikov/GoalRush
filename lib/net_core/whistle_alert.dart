@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -43,6 +44,17 @@ class WhistleAlert {
   String? _token;
   bool _armed = false;
 
+  // Completer that resolves as soon as the cold-start initial message has
+  // been fully processed (URL written to vault, or confirmed absent).
+  // _resumeGray() awaits this before draining so the race between
+  // stashPendingPush and drainPendingPush is eliminated.
+  final Completer<void> _coldTapCompleter = Completer<void>();
+
+  /// Resolves when the cold-start tap URL (if any) has been safely written
+  /// to the secure vault. Always await this in _resumeGray before calling
+  /// drainPendingPush on a cold start.
+  Future<void> get coldTapReady => _coldTapCompleter.future;
+
   /// Live (warm) push URL delivery → loaded straight into the WebView.
   void Function(String url)? onUrl;
 
@@ -52,7 +64,10 @@ class WhistleAlert {
   String? get token => _token;
 
   Future<void> ignite() async {
-    if (_armed) return;
+    if (_armed) {
+      if (!_coldTapCompleter.isCompleted) _coldTapCompleter.complete();
+      return;
+    }
     try {
       if (Firebase.apps.isEmpty) {
         await Firebase.initializeApp();
@@ -72,11 +87,16 @@ class WhistleAlert {
       FirebaseMessaging.onMessageOpenedApp.listen(_onWarmTap);
 
       final RemoteMessage? initial = await _fm!.getInitialMessage();
-      if (initial != null) _onColdTap(initial);
+      // Await _onColdTap so the vault write completes before coldTapReady
+      // resolves — eliminating the stash/drain race condition on cold start.
+      if (initial != null) await _onColdTap(initial);
 
       _armed = true;
     } catch (_) {
       // Firebase not wired yet — push stays dormant, app keeps running.
+    } finally {
+      // Always resolve so _resumeGray() is never stuck waiting.
+      if (!_coldTapCompleter.isCompleted) _coldTapCompleter.complete();
     }
   }
 
@@ -179,10 +199,10 @@ class WhistleAlert {
     );
   }
 
-  void _onColdTap(RemoteMessage message) {
+  Future<void> _onColdTap(RemoteMessage message) async {
     final String? url = message.data['url'] as String?;
     if (url != null && url.isNotEmpty) {
-      _box.stashPendingPush(url);
+      await _box.stashPendingPush(url);
     }
   }
 
