@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../constants/app_colors.dart';
 import '../constants/assets.dart';
 import '../services/game_state_service.dart';
+import 'game_scene_warmup.dart';
 import 'home_screen.dart';
 
 /// The very first screen the player sees. Unlike the rest of the (strictly
@@ -112,6 +113,10 @@ class _LoadingScreenState extends State<LoadingScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    // A snapshot of the currently-selected cosmetics for the off-screen
+    // GameScreen warm-up render below. Read once, non-listening, since we
+    // just need the values to feed the static warm-up layer.
+    final gameState = context.read<GameStateService>();
     return Scaffold(
       backgroundColor: AppColors.night,
       body: OrientationBuilder(
@@ -121,6 +126,25 @@ class _LoadingScreenState extends State<LoadingScreen> with SingleTickerProvider
           return Stack(
             fit: StackFit.expand,
             children: [
+              // GameScreen visual-composition warm-up. Painted BEHIND the
+              // opaque loading background so the user never sees it, but
+              // Flutter still walks through the full paint pipeline once:
+              // glyph atlas rasterization, GPU texture uploads for the four
+              // cosmetic images, Impeller pipeline compilation for the
+              // gradient / shadow / blur combinations. Without this, the
+              // very first "Play" tap on a fresh install used to stall the
+              // raster thread long enough (~1-3s on mid-range Android) to
+              // trigger an ANR. Kept in-tree for the whole LoadingScreen
+              // lifecycle so it's guaranteed to have been painted at least
+              // once before HomeScreen appears.
+              Positioned.fill(
+                child: GameSceneWarmup(
+                  selectedField: gameState.selectedField,
+                  selectedKeeper: gameState.selectedKeeper,
+                  selectedGoalpost: gameState.selectedGoalpost,
+                  selectedBall: gameState.selectedBall,
+                ),
+              ),
               Image.asset(asset, fit: BoxFit.cover),
               Positioned(
                 left: 0,
