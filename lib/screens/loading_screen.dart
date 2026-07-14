@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/assets.dart';
+import '../services/game_state_service.dart';
 import 'home_screen.dart';
 
 /// The very first screen the player sees. Unlike the rest of the (strictly
@@ -67,16 +69,28 @@ class _LoadingScreenState extends State<LoadingScreen> with SingleTickerProvider
   }
 
   Future<void> _warmUpAssets() async {
+    // Only the assets that the very next two screens (HomeScreen + GameScreen)
+    // actually paint on their first frame, in the order they appear. Loading
+    // the currently selected cosmetics — not [0] — so returning players don't
+    // get a decode stall the moment they hit "Play". Decoding is done one at a
+    // time on purpose: parallel `Future.wait` on 5-7 WEBPs was pushing the
+    // image cache + IO isolate hard enough during engine warm-up to leave
+    // GameScreen's first frame stalled long enough to trigger an ANR on the
+    // Play tap.
+    final gameState = context.read<GameStateService>();
     final assetsToWarm = <String>[
       AppAssets.logo,
-      AppAssets.verticalFields.first,
-      AppAssets.goalkeepers.first,
-      AppAssets.goalposts.first,
-      AppAssets.balls.first,
+      AppAssets.verticalFields[gameState.selectedField],
       AppAssets.goldenQuestionMark,
+      AppAssets.goalposts[gameState.selectedGoalpost],
+      AppAssets.goalkeepers[gameState.selectedKeeper],
+      AppAssets.balls[gameState.selectedBall],
       AppAssets.goldenTrophy,
     ];
-    await Future.wait(assetsToWarm.map((path) => precacheImage(AssetImage(path), context)));
+    for (final path in assetsToWarm) {
+      if (!mounted) return;
+      await precacheImage(AssetImage(path), context);
+    }
   }
 
   Future<void> _launch() async {
